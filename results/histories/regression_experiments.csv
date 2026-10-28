@@ -1,0 +1,5 @@
+model,optimizer,iters,converged,final_loss
+Linear Regression,Batch GD,120,False,1.789400e+00
+Linear Regression,Mini-batch SGD,120,False,1.790607e+00
+Linear Regression,Single-sample SGD,120,False,1.794118e+00
+Logistic Regression,GD,150,False,2.336742e-02

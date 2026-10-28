@@ -1,0 +1,24 @@
+id,algorithm_number,algorithm_name,failure_title,detected,detail,fail_iters,fail_f,good_iters,good_f,plot_path
+1,1,gradient_descent_fixed,Step Size Overshoot Divergence,True,Objective exploded: fun=1.84e+12,30,1838423435846.6511,90,3.9485407484442155e-12,results/plots\atlas_1.png
+2,2,gradient_descent_exact,Orthogonal Zig-Zagging in Ill-Conditioned Ravines,True,"Zigzag score: 1.00 (0 reversals, 29 orthogonal pairs out of 29)",30,5.080529619291289e-08,1,0.0,results/plots\atlas_2.png
+3,3,backtracking_line_search,Line Search Exhaustion on Non-Descent Direction,True,Line search failed on non-descent direction,50,0.0,7,0.0,results/plots\atlas_3.png
+4,4,armijo_condition,Armijo Condition Violation on Oversized Step,True,Armijo condition violated by oversized step,1,490050.0,1,12.9950125,results/plots\atlas_4.png
+5,5,gradient_descent_armijo,Step Size Collapse in Rosenbrock Ravine,True,"Step collapse: eff_step=1.93e-04 (< 1e-3), fun=1.80e-01 (> 100x good_f=1.31e-11)",100,0.18044553444421974,51,1.3097565904119956e-11,results/plots\atlas_5.png
+6,6,polyak_momentum,Resonant Energy Overshoot and Non-Monotonicity,True,Resonant energy overshoot: 73 objective increases,200,8.9165553367586,171,4.3624611114753525e-11,results/plots\atlas_6.png
+7,7,nesterov,Saddle Point Attraction on Invariant Subspace,True,"Stalled at saddle point: evals=[-2.0, 2.0], grad_norm=7.79e-06",96,1.5152128837989625e-11,85,-0.999999999988854,results/plots\atlas_7.png
+8,8,gd_linear_regression,Feature Scale Sensitivity and Ill-Conditioning,True,Feature scale stalling: loss=0.5905,100,0.5905032413484231,67,0.004351778704267837,results/plots\atlas_8.png
+9,9,sgd_linear_regression,Non-Vanishing Gradient Variance Noise Floor,True,Noise floor active: tail std=8.16e-05 vs good tail std=6.45e-10 (ratio 126536.9x >= 5x),150,0.004474373129005848,160,0.0043513904393045364,results/plots\atlas_9.png
+10,10,minibatch_sgd_linear_regression,Mini-batch Variance Plateau,True,Noise floor active: tail std=3.54e-05 vs good tail std=6.45e-10 (ratio 54933.2x >= 5x),150,0.01748206150611694,161,0.017405561546645135,results/plots\atlas_10.png
+11,11,logistic_regression_gd,Unbounded Weights on Linearly Separable Data,True,"Unbounded weights: norm grew from 6.27 (ep 400) to 13.54 (ep 4000, ratio 2.16 > 2.0x) and increasing over last 500 epochs",4000,0.03082791070711712,173,0.433490947385538,results/plots\atlas_11.png
+12,12,adagrad,Premature Step Freezing on Rosenbrock,True,"Step collapse: eff_step=3.30e-04 (< 1e-3), fun=2.19e+00 (> 100x good_f=4.56e-11)",1000,2.1862931410005824,73,4.558129996839481e-11,results/plots\atlas_12.png
+13,13,rmsprop,Ridge Chattering Across Steep Quadratic Walls,True,"Tail oscillation: 99 reversals, 100 sign flips over last 100 steps (min step 7.0425e-01 > 1.0e-03)",250,3.156266187644123,37,1.93893499866285e-07,results/plots\atlas_13.png
+14,14,adam,Large Learning Rate Limit Cycle Oscillation,True,"Tail oscillation: 43 reversals, 0 sign flips over last 100 steps (min step 1.6739e-03 > 1.0e-03)",250,0.9165108675061675,140,1.2424261324888235e-07,results/plots\atlas_14.png
+15,15,subgradient_method,Constant Step-Size Limit Cycle on Kink,True,"Tail oscillation: 99 reversals, 100 sign flips over last 100 steps (min step 6.0000e-01 > 1.0e-03)",200,0.40000000000000024,500,0.028829661326908992,results/plots\atlas_15.png
+16,16,subgradient_lasso,Lack of Exact Sparsity in Subgradient Lasso,True,No exact zeros present: all 2 weights are non-zero (min |w|=8.3848e-06),200,1.4735998716189116,200,0.015458613281462676,results/plots\atlas_16.png
+17,17,newton_method,Pure Newton Saddle Point Attraction,True,"Stalled at saddle point: evals=[-2.0, 2.0], grad_norm=0.00e+00",1,0.0,1,0.0,results/plots\atlas_17.png
+18,18,damped_newton_method,Non-Descent Direction Rejection in Negative Curvature,True,Damped Newton rejected non-descent direction,1,-0.75,1,0.0,results/plots\atlas_18.png
+19,19,verify_newton_one_step,Newton Quadratic Model Breakdown on Non-Quadratic Objective,True,Newton one-step failed on non-quadratic: dist=2.2083,1,4.731884325266608,1,0.0,results/plots\atlas_19.png
+20,20,bfgs,Negative Curvature Update Failure,True,Negative curvature encountered (s^T y <= 0),9,-1.0,1,0.0,results/plots\atlas_20.png
+21,21,lagrange_solver,Singular KKT Matrix from Redundant Constraints,True,Singular KKT matrix detected: Singular KKT matrix: redundant constraints or rank-deficient system (singular matrix),1,0.0,1,0.25,results/plots\atlas_21.png
+22,22,kkt_check,KKT First-Order Sufficiency Failure (Constrained Maximum),True,Stationary point is not a minimizer: reduced Hessian is not positive definite,1,1.0,1,1.0,results/plots\atlas_22.png
+23,23,licq_check,LICQ Violation from Collinear Constraint Gradients,True,"LICQ failed: rank=1 < 2, Gram det=0.0000e+00",1,0.0,1,0.0,results/plots\atlas_23.png

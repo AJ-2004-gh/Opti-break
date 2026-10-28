@@ -1,0 +1,17 @@
+task,model,iters,final_loss,converged,extra
+Linear Regression,GD Fixed,250,0.027521279648122638,False,
+Linear Regression,Momentum,109,0.027521262062745664,True,
+Linear Regression,Adam,217,0.027521262043186123,True,
+Linear Regression,AdaGrad,250,0.02752128927910307,False,
+Linear Regression,SGD,250,0.0286715539132849,False,
+Lasso (lambda=0.001),FISTA,200,0.005111838755377024,False,Non-zeros: 10/10
+Lasso (lambda=0.005),FISTA,200,0.005254239711891647,False,Non-zeros: 7/10
+Lasso (lambda=0.01),FISTA,200,0.005606109832640941,False,Non-zeros: 7/10
+Lasso (lambda=0.05),FISTA,185,0.010478145512987189,True,Non-zeros: 3/10
+Lasso (lambda=0.1),FISTA,185,0.02469908753176531,True,Non-zeros: 3/10
+Lasso (lambda=0.2),FISTA,184,0.08154742976823862,True,Non-zeros: 3/10
+Lasso (lambda=0.5),FISTA,184,0.47936417211589066,True,Non-zeros: 3/10
+Lasso (lambda=1.0),FISTA,171,1.8997274308056926,True,Non-zeros: 3/10
+Logistic Regression,GD Backtrack,117,0.47277136747854187,True,
+Logistic Regression,BFGS,11,0.4727713668751089,True,
+Logistic Regression,Newton Damped,4,0.4727713671015292,True,

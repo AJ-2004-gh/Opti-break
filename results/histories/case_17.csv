@@ -1,0 +1,3 @@
+iteration,good_f,good_grad_norm,bad_f,bad_grad_norm
+0,2.0,2.8284271247461903,0.0,2.8284271247461903
+1,0.0,0.0,0.0,0.0

@@ -1,0 +1,310 @@
+================================================================================
+OPTIBREAK FAILURE ATLAS REPORT
+A Systematic Empirical and Theoretical Study of Optimization Breakdown Modes
+================================================================================
+
+--------------------------------------------------------------------------------
+Case 01: Algorithm 01 - gradient_descent_fixed
+Failure Title : Step Size Overshoot Divergence
+Theory (Why)  : When the step size exceeds 2/L where L is the maximum eigenvalue of the Hessian, gradient descent geometrically oversteps the local quadratic approximation. The iterate norm grows exponentially until floating-point overflow or divergence guards terminate the optimization.
+Good run: step size alpha = 0.015 < 2/L converges stably to the minimizer
+Bad run: oversized step alpha = 0.025 > 2/L causes geometric norm divergence
+Detected      : YES (Objective exploded: fun=1.84e+12)
+Bad Run       : iters=30, final_f=1.8384e+12, grad_norm=1.9175e+07
+Good Run      : iters=90, final_f=3.9485e-12, grad_norm=8.8866e-06
+Plot Artifact : results/plots\atlas_1.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 02: Algorithm 02 - gradient_descent_exact
+Failure Title : Orthogonal Zig-Zagging in Ill-Conditioned Ravines
+Theory (Why)  : Exact line search enforces strict orthogonality between consecutive gradients, satisfying g_{k+1}^T g_k = 0 at every iteration. In ill-conditioned ravines where kappa >> 1, this orthogonality forces iterates into severe zig-zag oscillations that slow progress along the valley.
+Good run: isotropic quadratic (kappa = 1) converges in 1 exact step
+Bad run: ill-conditioned quadratic (kappa = 100) exhibits 90-degree zig-zag stalling
+Detected      : YES (Zigzag score: 1.00 (0 reversals, 29 orthogonal pairs out of 29))
+Bad Run       : iters=30, final_f=5.0805e-08, grad_norm=2.2652e-03
+Good Run      : iters=1, final_f=0.0000e+00, grad_norm=0.0000e+00
+Plot Artifact : results/plots\atlas_2.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 03: Algorithm 03 - backtracking_line_search
+Failure Title : Line Search Exhaustion on Non-Descent Direction
+Theory (Why)  : Backtracking line search relies on the directional derivative g^T d being strictly negative to guarantee that an Armijo step size exists. Along an ascent or non-descent direction where g^T d >= 0, the step size shrinks repeatedly until max halvings is exhausted, failing with alpha=0.
+Good run: backtracking along descent direction satisfies Armijo condition in few halvings
+Bad run: backtracking along ascent direction exhausts step halvings and fails
+Detected      : YES (Line search failed on non-descent direction)
+Bad Run       : iters=50, final_f=0.0000e+00, grad_norm=0.0000e+00
+Good Run      : iters=7, final_f=0.0000e+00, grad_norm=0.0000e+00
+Plot Artifact : results/plots\atlas_3.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 04: Algorithm 04 - armijo_condition
+Failure Title : Armijo Condition Violation on Oversized Step
+Theory (Why)  : The Armijo condition ensures sufficient decrease by requiring f(x + alpha * d) <= f(x) + c1 * alpha * g^T d. When an oversized step size is chosen, the objective overshoots the descent valley and violates the decrease bound, returning False.
+Good run: sufficient decrease test passes for moderate step alpha = 0.005
+Bad run: oversized step alpha = 1.0 violates sufficient decrease bound
+Detected      : YES (Armijo condition violated by oversized step)
+Bad Run       : iters=1, final_f=4.9005e+05, grad_norm=1.0000e+02
+Good Run      : iters=1, final_f=1.2995e+01, grad_norm=0.0000e+00
+Plot Artifact : results/plots\atlas_4.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 05: Algorithm 05 - gradient_descent_armijo
+Failure Title : Step Size Collapse in Rosenbrock Ravine
+Theory (Why)  : In high-curvature curved valleys like the Rosenbrock ravine, backtracking line search contracts step sizes severely to satisfy the Armijo decrease criterion. These contracted steps become so small that the algorithm stalls prematurely with high residual gradient norm before reaching the minimizer.
+Good run: quadratic bowl allows Armijo line search to reach minimizer cleanly
+Bad run: narrow curved Rosenbrock valley forces step size collapse to near zero
+Detected      : YES (Step collapse: eff_step=1.93e-04 (< 1e-3), fun=1.80e-01 (> 100x good_f=1.31e-11))
+Bad Run       : iters=100, final_f=1.8045e-01, grad_norm=3.0054e-01
+Good Run      : iters=51, final_f=1.3098e-11, grad_norm=6.1925e-06
+Plot Artifact : results/plots\atlas_5.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 06: Algorithm 06 - polyak_momentum
+Failure Title : Resonant Energy Overshoot and Non-Monotonicity
+Theory (Why)  : Polyak momentum acts as a heavy particle that accumulates kinetic energy along the descent trajectory. When the momentum constant beta is tuned too high (beta=0.99), the velocity overshoots the minimum repeatedly, causing frequent increases in objective value.
+Good run: tuned momentum beta = 0.8 accelerates stably down the ravine
+Bad run: high momentum beta = 0.99 causes resonant energy overshoot and oscillations
+Detected      : YES (Resonant energy overshoot: 73 objective increases)
+Bad Run       : iters=200, final_f=8.9166e+00, grad_norm=4.2140e+01
+Good Run      : iters=171, final_f=4.3625e-11, grad_norm=9.3421e-06
+Plot Artifact : results/plots\atlas_6.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 07: Algorithm 07 - nesterov
+Failure Title : Saddle Point Attraction on Invariant Subspace
+Theory (Why)  : When initialized on the symmetry axis of a saddle point where the unstable gradient component is exactly zero, momentum directions remain confined to the subspace. Accelerated gradient methods accelerate directly along the axis and stall at the saddle point.
+Good run: double well initialized off-axis escapes the saddle-like region into the minimizer
+Bad run: saddle point initialized on the symmetry axis has zero transverse momentum and stalls
+Detected      : YES (Stalled at saddle point: evals=[-2.0, 2.0], grad_norm=7.79e-06)
+Bad Run       : iters=96, final_f=1.5152e-11, grad_norm=7.7851e-06
+Good Run      : iters=85, final_f=-1.0000e+00, grad_norm=6.8020e-06
+Plot Artifact : results/plots\atlas_7.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 08: Algorithm 08 - gd_linear_regression
+Failure Title : Feature Scale Sensitivity and Ill-Conditioning
+Theory (Why)  : Batch gradient descent applies an identical learning rate across all weights, which is constrained by the maximum eigenvalue of X^T X. When features have drastically unequal scales (1000:1 ratio), unstandardized batch GD requires a tiny step size and stalls on unscaled weights.
+Good run: standardized features yield well-conditioned loss and rapid convergence
+Bad run: unstandardized features with scale 1000 stall optimization due to ill-conditioning
+Detected      : YES (Feature scale stalling: loss=0.5905)
+Bad Run       : iters=100, final_f=5.9050e-01, grad_norm=4.0702e+02
+Good Run      : iters=67, final_f=4.3518e-03, grad_norm=8.8129e-04
+Plot Artifact : results/plots\atlas_8.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 09: Algorithm 09 - sgd_linear_regression
+Failure Title : Non-Vanishing Gradient Variance Noise Floor
+Theory (Why)  : Single-sample stochastic gradient descent uses noisy estimates of the true gradient whose variance remains bounded away from zero. Under a constant learning rate, iterates cannot settle at the minimizer and fluctuate perpetually within an asymptotic noise floor.
+Good run: full-batch gradient descent converges deterministically to the analytic optimum
+Bad run: single-sample SGD fluctuates persistently within a non-vanishing noise floor
+Detected      : YES (Noise floor active: tail std=8.16e-05 vs good tail std=6.45e-10 (ratio 126536.9x >= 5x))
+Bad Run       : iters=150, final_f=4.4744e-03, grad_norm=1.5083e-02
+Good Run      : iters=160, final_f=4.3514e-03, grad_norm=9.9816e-06
+Plot Artifact : results/plots\atlas_9.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 10: Algorithm 10 - minibatch_sgd_linear_regression
+Failure Title : Mini-batch Variance Plateau
+Theory (Why)  : While mini-batching reduces gradient variance by 1/B, nonzero variance persists for any finite batch size under a constant learning rate. Iterates quickly approach the neighborhood of the optimum and then plateau into a steady-state fluctuation ball.
+Good run: full-batch gradient descent converges smoothly to the minimum
+Bad run: mini-batch SGD with batch size 2 exhibits variance plateau near the optimum
+Detected      : YES (Noise floor active: tail std=3.54e-05 vs good tail std=6.45e-10 (ratio 54933.2x >= 5x))
+Bad Run       : iters=150, final_f=1.7482e-02, grad_norm=1.2305e-02
+Good Run      : iters=161, final_f=1.7406e-02, grad_norm=9.2614e-06
+Plot Artifact : results/plots\atlas_10.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 11: Algorithm 11 - logistic_regression_gd
+Failure Title : Unbounded Weights on Linearly Separable Data
+Theory (Why)  : For linearly separable data without regularization, binary cross-entropy loss monotonically decreases only as predicted probabilities approach 1. Gradient descent drives the norm of the weight vector toward infinity to sharpen the logistic sigmoid.
+Good run: overlapping classification data yields bounded weights and stable convergence
+Bad run: linearly separable data drives unregularized logistic weights toward infinity
+Detected      : YES (Unbounded weights: norm grew from 6.27 (ep 400) to 13.54 (ep 4000, ratio 2.16 > 2.0x) and increasing over last 500 epochs)
+Bad Run       : iters=4000, final_f=3.0828e-02, grad_norm=2.3254e-03
+Good Run      : iters=173, final_f=4.3349e-01, grad_norm=4.9701e-03
+Plot Artifact : results/plots\atlas_11.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 12: Algorithm 12 - adagrad
+Failure Title : Premature Step Freezing on Rosenbrock
+Theory (Why)  : AdaGrad continuously accumulates squared historical gradients in its denominator without exponential forgetting. In long ravines, this denominator grows unboundedly, freezing coordinate step sizes and stalling the optimizer far from the minimizer.
+Good run: AdaGrad on moderate quadratic adapts learning rates and reaches the minimum
+Bad run: AdaGrad on Rosenbrock accumulates large gradients and freezes step sizes prematurely
+Detected      : YES (Step collapse: eff_step=3.30e-04 (< 1e-3), fun=2.19e+00 (> 100x good_f=4.56e-11))
+Bad Run       : iters=1000, final_f=2.1863e+00, grad_norm=2.2960e+00
+Good Run      : iters=73, final_f=4.5581e-11, grad_norm=9.5479e-06
+Plot Artifact : results/plots\atlas_12.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 13: Algorithm 13 - rmsprop
+Failure Title : Ridge Chattering Across Steep Quadratic Walls
+Theory (Why)  : RMSProp normalizes coordinate steps using the root-mean-squared historical gradient, equalizing effective step lengths across all directions. On highly anisotropic quadratics, this normalization amplifies updates along the steep valley walls, causing violent oscillations across the ridge.
+Good run: tuned RMSProp with learning rate 0.05 smoothly descends the anisotropic valley
+Bad run: aggressive learning rate 0.5 creates persistent high-frequency limit cycle bouncing
+Detected      : YES (Tail oscillation: 99 reversals, 100 sign flips over last 100 steps (min step 7.0425e-01 > 1.0e-03))
+Bad Run       : iters=250, final_f=3.1563e+00, grad_norm=2.5001e+01
+Good Run      : iters=37, final_f=1.9389e-07, grad_norm=6.2273e-04
+Plot Artifact : results/plots\atlas_13.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 14: Algorithm 14 - adam
+Failure Title : Large Learning Rate Limit Cycle Oscillation
+Theory (Why)  : When Adam is initialized in steep valleys with an aggressive learning rate (lr=0.5), coordinate updates overshoot the valley walls repeatedly. Iterates become trapped in a persistent high-energy limit cycle where step lengths remain strictly above 1e-3.
+Good run: tuned Adam with learning rate 0.05 stably minimizes the quadratic surface
+Bad run: large learning rate 0.5 overshoots narrow Rosenbrock walls into an oscillatory loop
+Detected      : YES (Tail oscillation: 43 reversals, 0 sign flips over last 100 steps (min step 1.6739e-03 > 1.0e-03))
+Bad Run       : iters=250, final_f=9.1651e-01, grad_norm=3.8100e+01
+Good Run      : iters=140, final_f=1.2424e-07, grad_norm=9.2670e-04
+Plot Artifact : results/plots\atlas_14.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 15: Algorithm 15 - subgradient_method
+Failure Title : Constant Step-Size Limit Cycle on Kink
+Theory (Why)  : The subdifferential of a nonsmooth function does not vanish at non-differentiable extrema, retaining unit order even at the minimizer. With a constant step size, subgradient updates overshoot the kink on every step, trapping the iterate in a perpetual limit cycle.
+Good run: diminishing step size 0.5/sqrt(k) converges to non-smooth kink at origin
+Bad run: constant step size 0.5 chatters perpetually across the non-differentiable kink
+Detected      : YES (Tail oscillation: 99 reversals, 100 sign flips over last 100 steps (min step 6.0000e-01 > 1.0e-03))
+Bad Run       : iters=200, final_f=4.0000e-01, grad_norm=2.0000e+00
+Good Run      : iters=500, final_f=2.8830e-02, grad_norm=2.2361e+00
+Plot Artifact : results/plots\atlas_15.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 16: Algorithm 16 - subgradient_lasso
+Failure Title : Lack of Exact Sparsity in Subgradient Lasso
+Theory (Why)  : Subgradient optimization applies smooth Euclidean steps along an arbitrary subgradient element, which has measure zero probability of landing at exact zeros. Unlike proximal soft-thresholding, subgradient Lasso produces tiny nonzero weights without true sparsity.
+Good run: unregularized least squares problem converges to unconstrained continuous solution
+Bad run: subgradient method on Lasso fails to produce exact zero coefficients
+Detected      : YES (No exact zeros present: all 2 weights are non-zero (min |w|=8.3848e-06))
+Bad Run       : iters=200, final_f=1.4736e+00, grad_norm=9.7367e-01
+Good Run      : iters=200, final_f=1.5459e-02, grad_norm=1.4369e-01
+Plot Artifact : results/plots\atlas_16.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 17: Algorithm 17 - newton_method
+Failure Title : Pure Newton Saddle Point Attraction
+Theory (Why)  : Pure Newton's method solves H p = -g to find stationary points where the gradient vanishes, regardless of whether the Hessian is positive definite, negative definite, or indefinite. Near a saddle point, Newton steps move directly toward the stationary saddle.
+Good run: convex quadratic: Newton reaches the minimizer in 1 step
+Bad run: indefinite Hessian: Newton lands on the saddle in 1 step
+Detected      : YES (Stalled at saddle point: evals=[-2.0, 2.0], grad_norm=0.00e+00)
+Bad Run       : iters=1, final_f=0.0000e+00, grad_norm=0.0000e+00
+Good Run      : iters=1, final_f=0.0000e+00, grad_norm=0.0000e+00
+Plot Artifact : results/plots\atlas_17.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 18: Algorithm 18 - damped_newton_method
+Failure Title : Non-Descent Direction Rejection in Negative Curvature
+Theory (Why)  : When the Hessian has negative eigenvalues in non-convex regions, the classical Newton direction p = -H^{-1} g can yield g^T p > 0, pointing uphill. Damped Newton with Armijo line search detects this non-descent direction and aborts the step rather than increasing the loss.
+Good run: convex quadratic: Newton step is a valid descent direction accepted by Armijo
+Bad run: saddle region: Newton direction has positive inner product and line search aborts
+Detected      : YES (Damped Newton rejected non-descent direction)
+Bad Run       : iters=1, final_f=-7.5000e-01, grad_norm=2.2361e+00
+Good Run      : iters=1, final_f=0.0000e+00, grad_norm=0.0000e+00
+Plot Artifact : results/plots\atlas_18.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 19: Algorithm 19 - verify_newton_one_step
+Failure Title : Newton Quadratic Model Breakdown on Non-Quadratic Objective
+Theory (Why)  : Newton's method achieves exact one-step convergence exclusively on quadratic functions where higher-order Taylor derivatives vanish identically. On non-quadratic functions like Rosenbrock, a single Newton step incurs truncation errors and leaves significant residual distance to the minimizer.
+Good run: pure quadratic objective: Newton step is exact with zero residual distance
+Bad run: quartic Rosenbrock function: higher-order Taylor terms leave large truncation residual
+Detected      : YES (Newton one-step failed on non-quadratic: dist=2.2083)
+Bad Run       : iters=1, final_f=4.7319e+00, grad_norm=4.6394e+00
+Good Run      : iters=1, final_f=0.0000e+00, grad_norm=0.0000e+00
+Plot Artifact : results/plots\atlas_19.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 20: Algorithm 20 - bfgs
+Failure Title : Negative Curvature Update Failure
+Theory (Why)  : The BFGS secant update preserves positive definiteness of inverse Hessian approximations only if the curvature condition s_k^T y_k > 0 holds. On the bounded double well f(x, y) = x^4 - 2x^2 + y^2 in regions of negative curvature (|x| < 0.577), s^T y <= 0 occurs and updates are skipped.
+Good run: strictly convex quadratic preserves positive curvature s^T y > 0 for all updates
+Bad run: nonconvex double well visits negative curvature region causing skipped BFGS updates
+Detected      : YES (Negative curvature encountered (s^T y <= 0))
+Bad Run       : iters=9, final_f=-1.0000e+00, grad_norm=2.2711e-08
+Good Run      : iters=1, final_f=0.0000e+00, grad_norm=0.0000e+00
+Plot Artifact : results/plots\atlas_20.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 21: Algorithm 21 - lagrange_solver
+Failure Title : Singular KKT Matrix from Redundant Constraints
+Theory (Why)  : Equality-constrained quadratic optimization requires the constraint matrix A to have full row rank to guarantee nonsingularity of the block KKT system. When redundant or linearly dependent constraints are specified, the KKT matrix is rank-deficient and cannot be solved by Gaussian elimination.
+Good run: linearly independent constraints form an invertible KKT coefficient matrix
+Bad run: redundant duplicate equality constraints produce a singular non-invertible KKT matrix
+Detected      : YES (Singular KKT matrix detected: Singular KKT matrix: redundant constraints or rank-deficient system (singular matrix))
+Bad Run       : iters=1, final_f=0.0000e+00, grad_norm=0.0000e+00
+Good Run      : iters=1, final_f=2.5000e-01, grad_norm=0.0000e+00
+Plot Artifact : results/plots\atlas_21.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 22: Algorithm 22 - kkt_check
+Failure Title : KKT First-Order Sufficiency Failure (Constrained Maximum)
+Theory (Why)  : First-order KKT conditions ensure only that the Lagrangian gradient vanishes, which is necessary for any local extremum. On indefinite or non-convex objectives, a stationary point satisfying all KKT conditions can be a constrained local maximum if the reduced Hessian is negative definite.
+Good run: constrained minimizer satisfies first-order KKT and positive definite reduced Hessian
+Bad run: constrained maximizer passes first-order KKT but fails second-order sufficiency check
+Detected      : YES (Stationary point is not a minimizer: reduced Hessian is not positive definite)
+Bad Run       : iters=1, final_f=1.0000e+00, grad_norm=0.0000e+00
+Good Run      : iters=1, final_f=1.0000e+00, grad_norm=0.0000e+00
+Plot Artifact : results/plots\atlas_22.png
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Case 23: Algorithm 23 - licq_check
+Failure Title : LICQ Violation from Collinear Constraint Gradients
+Theory (Why)  : The Linear Independence Constraint Qualification requires the gradient vectors of all active constraints to be linearly independent. When active constraint gradients are collinear, the constraint Jacobian loses row rank, the Gram determinant vanishes, and Lagrange multipliers may be non-unique or unbounded.
+Good run: transverse constraint boundaries have linearly independent active gradients (rank 2)
+Bad run: tangent circle constraints have collinear opposing gradients failing LICQ (rank 1 < 2)
+Detected      : YES (LICQ failed: rank=1 < 2, Gram det=0.0000e+00)
+Bad Run       : iters=1, final_f=0.0000e+00, grad_norm=0.0000e+00
+Good Run      : iters=1, final_f=0.0000e+00, grad_norm=0.0000e+00
+Plot Artifact : results/plots\atlas_23.png
+--------------------------------------------------------------------------------
+
+========================================================================================================================
+SUMMARY TABLE
+========================================================================================================================
+Case | Detected | Good run                                           | Bad run                                           
+------------------------------------------------------------------------------------------------------------------------
+1    | YES      | step size alpha = 0.015 < 2/L converges stably to the minimizer | oversized step alpha = 0.025 > 2/L causes geometric norm divergence
+2    | YES      | isotropic quadratic (kappa = 1) converges in 1 exact step | ill-conditioned quadratic (kappa = 100) exhibits 90-degree zig-zag stalling
+3    | YES      | backtracking along descent direction satisfies Armijo condition in few halvings | backtracking along ascent direction exhausts step halvings and fails
+4    | YES      | sufficient decrease test passes for moderate step alpha = 0.005 | oversized step alpha = 1.0 violates sufficient decrease bound
+5    | YES      | quadratic bowl allows Armijo line search to reach minimizer cleanly | narrow curved Rosenbrock valley forces step size collapse to near zero
+6    | YES      | tuned momentum beta = 0.8 accelerates stably down the ravine | high momentum beta = 0.99 causes resonant energy overshoot and oscillations
+7    | YES      | double well initialized off-axis escapes the saddle-like region into the minimizer | saddle point initialized on the symmetry axis has zero transverse momentum and stalls
+8    | YES      | standardized features yield well-conditioned loss and rapid convergence | unstandardized features with scale 1000 stall optimization due to ill-conditioning
+9    | YES      | full-batch gradient descent converges deterministically to the analytic optimum | single-sample SGD fluctuates persistently within a non-vanishing noise floor
+10   | YES      | full-batch gradient descent converges smoothly to the minimum | mini-batch SGD with batch size 2 exhibits variance plateau near the optimum
+11   | YES      | overlapping classification data yields bounded weights and stable convergence | linearly separable data drives unregularized logistic weights toward infinity
+12   | YES      | AdaGrad on moderate quadratic adapts learning rates and reaches the minimum | AdaGrad on Rosenbrock accumulates large gradients and freezes step sizes prematurely
+13   | YES      | tuned RMSProp with learning rate 0.05 smoothly descends the anisotropic valley | aggressive learning rate 0.5 creates persistent high-frequency limit cycle bouncing
+14   | YES      | tuned Adam with learning rate 0.05 stably minimizes the quadratic surface | large learning rate 0.5 overshoots narrow Rosenbrock walls into an oscillatory loop
+15   | YES      | diminishing step size 0.5/sqrt(k) converges to non-smooth kink at origin | constant step size 0.5 chatters perpetually across the non-differentiable kink
+16   | YES      | unregularized least squares problem converges to unconstrained continuous solution | subgradient method on Lasso fails to produce exact zero coefficients
+17   | YES      | convex quadratic: Newton reaches the minimizer in 1 step | indefinite Hessian: Newton lands on the saddle in 1 step
+18   | YES      | convex quadratic: Newton step is a valid descent direction accepted by Armijo | saddle region: Newton direction has positive inner product and line search aborts
+19   | YES      | pure quadratic objective: Newton step is exact with zero residual distance | quartic Rosenbrock function: higher-order Taylor terms leave large truncation residual
+20   | YES      | strictly convex quadratic preserves positive curvature s^T y > 0 for all updates | nonconvex double well visits negative curvature region causing skipped BFGS updates
+21   | YES      | linearly independent constraints form an invertible KKT coefficient matrix | redundant duplicate equality constraints produce a singular non-invertible KKT matrix
+22   | YES      | constrained minimizer satisfies first-order KKT and positive definite reduced Hessian | constrained maximizer passes first-order KKT but fails second-order sufficiency check
+23   | YES      | transverse constraint boundaries have linearly independent active gradients (rank 2) | tangent circle constraints have collinear opposing gradients failing LICQ (rank 1 < 2)
+------------------------------------------------------------------------------------------------------------------------

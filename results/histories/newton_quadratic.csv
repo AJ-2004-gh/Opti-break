@@ -1,0 +1,8 @@
+kappa,newton_iters,newton_converged,gd_iters,gd_converged,bfgs_iters,bfgs_converged
+1,1,True,1,True,1,True
+5,1,True,27,True,4,True
+10,1,True,48,True,4,True
+50,1,True,268,True,3,True
+100,1,True,530,True,3,True
+500,1,True,1000,False,2,True
+1000,1,True,1000,False,2,True

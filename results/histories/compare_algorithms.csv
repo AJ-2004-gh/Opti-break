@@ -1,0 +1,6 @@
+algorithm,iters,converged,final_f,final_grad_norm
+GD Fixed,90,True,3.948541e-12,8.886552e-06
+GD Exact,17,True,4.003767e-12,9.196025e-06
+GD Armijo,35,True,2.668639e-12,9.775613e-06
+Polyak Momentum,134,True,9.550091e-13,9.496493e-06
+Nesterov Accelerated,79,True,4.856010e-15,3.116411e-07

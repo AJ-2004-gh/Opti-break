@@ -1,0 +1,6 @@
+method,iters,final_val
+Subgradient,400,3.651032e-02
+Subgradient Lasso,200,2.432720e-01
+Lagrange Solver,1,5.000000e-01
+KKT Check,1,1.000000e+00
+LICQ Check,1,1.000000e+00
